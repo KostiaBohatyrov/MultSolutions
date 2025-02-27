@@ -45,4 +45,4 @@ jobs:
 
       - name: End SonarCloud Analysis
         shell: bash
-        run: dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+        run: dotnet sonarscanner end
