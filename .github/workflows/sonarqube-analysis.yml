@@ -35,12 +35,10 @@ jobs:
         run: dotnet build One/One.sln --configuration Release --no-restore; dotnet build Two/Two.sln --configuration Release --no-restore
       - name: Test and Collect Coverage for One Solution
         shell: powershell
-        run: dotnet test One/One.sln --configuration Release --no-build --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=json
-      
+        run: dotnet test One/One.sln --configuration Release --no-build --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=cobertura /p:CoverletOutput=coverage/coverageOne.xml /p:CoverletUseRelativePaths=true
       - name: Test and Collect Coverage for Two Solution
         shell: powershell
-        run: dotnet test Two/Two.sln --configuration Release --no-build --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=json
-      
+        run: dotnet test Two/Two.sln --configuration Release --no-build --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=cobertura /p:CoverletOutput=coverage/coverageTwo.xml /p:CoverletUseRelativePaths=true
       - name: End SonarCloud Analysis
         shell: powershell
         env:
