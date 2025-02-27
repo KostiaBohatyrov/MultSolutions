@@ -26,7 +26,7 @@ jobs:
         shell: powershell
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: .\.sonar\scanner\dotnet-sonarscanner begin /k:"KostiaBohatyrov_MultSolutions" /o:"kostiabohatyrov" /d:sonar.token="$env:SONAR_TOKEN" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="coverage/**/coverage.cobertura.xml"
+        run: .\.sonar\scanner\dotnet-sonarscanner begin /k:"KostiaBohatyrov_MultSolutions" /o:"kostiabohatyrov" /d:sonar.token="$env:SONAR_TOKEN" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="coverage/**/coverage.opencover.xml"
       - name: Restore Solutions
         shell: powershell
         run: dotnet restore One/One.sln; dotnet restore Two/Two.sln
@@ -35,10 +35,10 @@ jobs:
         run: dotnet build One/One.sln --configuration Release --no-restore; dotnet build Two/Two.sln --configuration Release --no-restore
       - name: Test and Collect Coverage for One Solution
         shell: powershell
-        run: dotnet test One/One.sln --configuration Release --no-build --collect:"XPlat Code Coverage" --results-directory "coverage" /p:CoverletOutputFormat=cobertura
+        run: dotnet test One/One.sln --configuration Release --no-build --collect:"XPlat Code Coverage" --results-directory "coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
       - name: Test and Collect Coverage for Two Solution
         shell: powershell
-        run: dotnet test Two/Two.sln --configuration Release --no-build --collect:"XPlat Code Coverage" --results-directory "coverage" /p:CoverletOutputFormat=cobertura
+        run: dotnet test Two/Two.sln --configuration Release --no-build --collect:"XPlat Code Coverage" --results-directory "coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
       - name: End SonarCloud Analysis
         shell: powershell
         env:
