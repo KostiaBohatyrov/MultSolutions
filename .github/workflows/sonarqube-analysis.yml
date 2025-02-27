@@ -25,6 +25,7 @@ jobs:
         run: dotnet tool install --global dotnet-sonarscanner
 
       - name: Begin SonarCloud Analysis
+        shell: bash
         run: |
           dotnet sonarscanner begin /k:"KostiaBohatyrov_MultSolutions" /n:"YMultSolutions" \
             /d:sonar.organization="kostiabohatyrov" \
@@ -51,4 +52,5 @@ jobs:
           /p:CoverletOutputFormat=cobertura /p:CoverletOutput=coverage/coverageTwo.xml
 
       - name: End SonarCloud Analysis
+        shell: bash
         run: dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
