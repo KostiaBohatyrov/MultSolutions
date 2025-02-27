@@ -6,43 +6,41 @@ on:
       - master
 
 jobs:
-  sonarCloud:
+  build_and_analyze:
+    name: Build and Analyze
     runs-on: windows-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0.x'
-      
-      - name: Create coverage directory
-        run: mkdir coverage
-
-      - name: Install SonarScanner for .NET
-        run: dotnet tool install --global dotnet-sonarscanner
-
+      - name: Create directories
+        shell: powershell
+        run: mkdir coverage; mkdir .\.sonar\scanner
+      - name: Install SonarCloud Scanner
+        shell: powershell
+        run: dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
       - name: Begin SonarCloud Analysis
-        run: dotnet sonarscanner begin  /k:"KostiaBohatyrov_MultSolutions" /o:"kostiabohatyrov" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="coverage/coverageOne.xml,coverage/coverageTwo.xml"
-      
+        shell: powershell
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: .\.sonar\scanner\dotnet-sonarscanner begin /k:"KostiaBohatyrov_MultSolutions" /o:"kostiabohatyrov" /d:sonar.token="$env:SONAR_TOKEN" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="coverage/coverageOne.xml,coverage/coverageTwo.xml"
       - name: Restore Solutions
-        run: |
-          dotnet restore One/One.sln
-          dotnet restore Two/Two.sln
-
+        shell: powershell
+        run: dotnet restore One/One.sln && dotnet restore Two/Two.sln
       - name: Build Solutions
-        run: |
-          dotnet build One/One.sln --configuration Release --no-restore
-          dotnet build Two/Two.sln --configuration Release --no-restore
-
-      - name: Test and collect coverage for One solution
+        shell: powershell
+        run: dotnet build One/One.sln --configuration Release --no-restore && dotnet build Two/Two.sln --configuration Release --no-restore
+      - name: Test and Collect Coverage for One Solution
+        shell: powershell
         run: dotnet test One/One.sln --configuration Release --no-build --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=cobertura /p:CoverletOutput=coverage/coverageOne.xml
-
-      - name: Test and collect coverage for Two solution
+      - name: Test and Collect Coverage for Two Solution
+        shell: powershell
         run: dotnet test Two/Two.sln --configuration Release --no-build --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=cobertura /p:CoverletOutput=coverage/coverageTwo.xml
-
       - name: End SonarCloud Analysis
-        shell: bash
-        run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+        shell: powershell
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="$env:SONAR_TOKEN"
